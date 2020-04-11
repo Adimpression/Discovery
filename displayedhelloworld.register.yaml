@@ -1,0 +1,23 @@
+artifact:
+  appState: 'IsDisplayedHelloWorld'
+  appName: 'displayedhelloworld'
+  appDomain: 'displayedhelloworld'
+  appImage:
+    development: 'localhost:32000/displayedhelloworld'
+    staging:
+    production: 'adimpression/displayedhelloworld:1.0.0'
+  appRelease: '1.0.0'
+  appSpacialScope:
+    internet: true
+    cluster: true
+  ports:
+    - 8080
+  conf:
+    development:
+    staging:
+    production:
+  enc:
+    development:
+    staging:
+    production:
+  dependencies:
