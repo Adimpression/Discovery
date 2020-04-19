@@ -1,0 +1,33 @@
+{{ if .Values.artifact.appSpacialScope.internet }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name:  proxy.{{ .Values.artifact.appDomain }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: proxy.{{ .Values.artifact.appDomain }}
+      app: proxy.{{ .Values.artifact.appDomain }}
+  template:
+    metadata:
+      labels:
+        name: proxy.{{ .Values.artifact.appDomain }}
+        app: proxy.{{ .Values.artifact.appDomain }}
+    spec:
+      containers:
+        - name: proxy-{{ .Values.artifact.appName }}
+          image: adimpression/grpc.web.go:2.0.5
+          ports:
+            - containerPort: 8443
+            - containerPort: 8081
+          args: [
+            "--run_tls_server=false",
+            "--allow_all_origins",
+            "--backend_addr={{ .Values.artifact.appName }}:80"
+          ]
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 8081
+{{- end }}

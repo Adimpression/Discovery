@@ -1,0 +1,13 @@
+{{ if .Values.artifact.appSpacialScope.internet }}
+apiVersion: v1
+kind: Service
+metadata:
+  name:  proxy-{{ .Values.artifact.appName }}
+spec:
+  ports:
+    - port: 8080
+      targetPort: 8080
+      protocol: TCP
+  selector:
+    app:  proxy.{{ .Values.artifact.appDomain }}
+{{- end }}

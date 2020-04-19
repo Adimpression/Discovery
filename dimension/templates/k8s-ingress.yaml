@@ -1,0 +1,47 @@
+{{- with .Values }}
+  {{ if .artifact.appSpacialScope.internet }}
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  annotations:
+    #  https://cloud.google.com/community/tutorials/nginx-ingress-gke
+    kubernetes.io/ingress.class: "nginx"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
+    nginx.ingress.kubernetes.io/enable-access-log: "true"
+    nginx.ingress.kubernetes.io/enable-rewrite-log: "true"
+    nginx.ingress.kubernetes.io/enable-opentracing: "true"
+    kubernetes.io/ingress.global-static-ip-name: "s-qs-fyi"
+  name: {{ .artifact.appName }}-s-qs-fyi-ingress
+  namespace: default
+spec:
+  rules:
+    {{ if eq .artifact.profile "production" }}
+    - host: s.qs.fyi
+    {{ else if eq .artifact.profile "staging" }}
+    - host:
+    {{ else }}
+    - host:
+    {{ end }}
+      http:
+        paths:
+          - path: /{{ .artifact.appDomain }}.{{ .artifact.appDomain }}.To{{ .artifact.appState }}/Produce
+            backend:
+              serviceName: proxy-{{ .artifact.appName }}
+              servicePort: 8080
+  {{ if eq .artifact.profile "production" }}
+  {{- range $key, $value := .artifact.enc.production }}
+  tls:
+    - secretName: s-qs-fyi-tls
+      hosts:
+        - s.qs.fyi
+  {{- end }}
+  {{ else if eq .artifact.profile "staging" }}
+  {{- range $key, $value := .artifact.enc.staging }}
+  {{- end }}
+  {{ else }}
+  {{- range $key, $value := .artifact.enc.development }}
+  {{- end }}
+  {{ end }}
+  {{ end }}
+{{- end }}

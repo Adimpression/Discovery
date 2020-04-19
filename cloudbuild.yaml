@@ -1,0 +1,21 @@
+steps:
+  - name: 'gcr.io/$PROJECT_ID/helm'
+    args: [
+      'upgrade',
+      '--install',
+      '--force',
+      '$TAG_NAME',
+      './dimension',
+      '--set-file',
+      'register=./$TAG_NAME.register.yaml',
+      '--set',
+      'artifact.profile=production',
+      '-f',
+      './$TAG_NAME.register.yaml'
+    ]
+    env:
+      - 'CLOUDSDK_COMPUTE_ZONE=europe-north1'
+      - 'CLOUDSDK_CONTAINER_CLUSTER=s-qs-fyi'
+      - 'GCLOUD_PROJECT=$PROJECT_ID'
+tags: ['$TAG_NAME']
+

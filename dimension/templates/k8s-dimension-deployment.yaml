@@ -1,0 +1,99 @@
+{{- with .Values }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name:  {{ .artifact.appDomain }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: {{ .artifact.appDomain }}
+      app: {{ .artifact.appDomain }}
+  template:
+    metadata:
+      labels:
+        name: {{ .artifact.appDomain }}
+        app: {{ .artifact.appDomain }}
+    spec:
+      containers:
+      - name: {{ .artifact.appName }}
+        {{ if eq .artifact.profile "production" }}
+        image: {{ .artifact.appImage.production }}:{{ .artifact.appRelease }}
+        {{ else if eq .artifact.profile "staging" }}
+        image: {{ .artifact.appImage.staging }}:{{ .artifact.appRelease }}
+        {{ else }}
+        image: {{ .artifact.appImage.development }}:{{ .artifact.appRelease }}
+        {{ end }}
+        imagePullPolicy: Always
+        ports:
+          {{- range .artifact.ports }}
+          - containerPort: {{ . }}
+          {{- end }}
+        # In case you need to debug. You may need to set the base image to busybox instead of ditroless.
+        # command: [ "/bin/sh", "-c", "--" ]
+        # args: [ "while true; do sleep 30; done;" ]
+        env:
+          - name: profile
+            value: {{ .artifact.profile }}
+        {{ if eq .artifact.profile "production" }}
+          {{- range $key, $value := .artifact.conf.production }}
+          - name: {{ $key }}
+            value: {{ $value | quote }}
+          {{- end }}
+        {{ else if eq .artifact.profile "staging" }}
+          {{- range $key, $value := .artifact.conf.staging }}
+          - name: {{ $key }}
+            value: {{ $value | quote }}
+          {{- end }}
+        {{ else }}
+          {{- range $key, $value := .artifact.conf.development }}
+          - name: {{ $key }}
+            value: {{ $value | quote }}
+          {{- end }}
+        {{ end }}
+          - name: app_state
+            value: {{ .artifact.appState | quote }}
+          - name: app_name
+            value: {{ .artifact.appName | quote }}
+          - name: app_domain
+            value: {{ .artifact.appDomain | quote }}
+        volumeMounts:
+          - name: dimensions
+            mountPath: /etc/dimensions/
+          - name: secrets-volume
+            mountPath: /etc/{{ .artifact.appDomain }}/secrets
+        {{- range .artifact.dependencies }}
+          - name: {{ .artifact.appName }}-secrets-volume
+            mountPath: /etc/{{ .artifact.appDomain }}/secrets
+        {{- end }}
+      #{{- range .artifact.dependencies }}
+      #- name: {{ .artifact.appName }}
+      #  image: {{ .artifact.appImage }}:{{ .artifact.appRelease }}
+      #  imagePullPolicy: Always
+      #  ports:
+      #    {{- range .artifact.ports }}
+      #    - containerPort: {{ . }}
+      #    {{- end }}
+      #  env:
+      #    - name: profile
+      #      value: {{ .artifact.profile }}
+      #  volumeMounts:
+      #    - name: secrets-volume
+      #      mountPath: /etc/{{ .artifact.appDomain }}/secrets
+      #{{- end }}
+      volumes:
+        - name: dimensions
+          configMap:
+            name: dimensions
+        - name: secrets-volume
+          secret:
+            secretName: {{ .artifact.appName }}
+      # FIXME: These secrets were not direcly from this service, but rather created by others. This can cause locks.
+      # Consider bringing all config to the env service (remote)
+      {{- range .artifact.dependencies }}
+        - name: {{ .artifact.appName }}-secrets-volume
+          secret:
+            secretName: {{ .artifact.appName }}
+      {{- end }}
+{{- end }}
+

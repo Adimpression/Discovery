@@ -1,0 +1,38 @@
+artifact:
+  profile: 'production'
+  appState: 'IsExample'
+  appName: 'example'
+  appDomain: 'example'
+  appImage:
+    development: 'localhost:32000/example'
+    staging:
+    production: 'example.com/image'
+  appRelease: '1.0.0'
+  appSpacialScope:
+    internet: false
+    cluster: false
+  ports:
+    - 8080
+  conf:
+    development:
+    staging:
+    production:
+  enc:
+    # Don't put any defaults here (decryption will fail)
+    development:
+    staging:
+    production:
+  dependencies:
+    # Where do I find the code / classes / executable of the 'spacial'. Except in memory, others can be appImage.
+    # - artifact:
+    #     appState: 'IsOsv'
+    #     appName: 'dot-osv'
+    #     appDomain: 'dot.osv'
+    # - artifact:
+    #     appState: 'IsDot'
+    #     appName: 'dot'
+    #     appDomain: 'dot'
+    # - artifact:
+    #     appState: 'IsEnv'
+    #     appName: 'env'
+    #     appDomain: 'env'
