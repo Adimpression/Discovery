@@ -5,7 +5,7 @@ artifact:
   appImage:
     development: 'localhost:32000/displayedhelloworld'
     staging:
-    production: 'adimpression/displayedhelloworld:1.0.0'
+    production: 'adimpression/displayedhelloworld'
   appRelease: '1.0.0'
   appSpacialScope:
     internet: true
